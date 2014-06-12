@@ -15,100 +15,95 @@ import com.zwsatan.donttouchwhite.GameView.GameMode;
 
 public class MainActivity extends Activity {
 
-	private static final String DATA_GAME_MODE = "GameMode";
-	private static final String DATA_IS_GAME_RESTART = "GameRestart";
-	
-	public static int SCREEN_WIDTH;
-	public static int SCREEN_HEIGHT;
-	
-	private static MainActivity mainActivity;
-	
-	private Button buttonClassic;
-	private Button buttonFaster;
-	private Button buttonZen;
-	private Button buttonMusic;
-	private GameView gameView;
-	
 	public MainActivity() {
 		mainActivity = this;
 	}
+	
+	public static MainActivity getMainActivity() {
+    	return mainActivity;
+    }
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 获取屏幕大小
-        DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		SCREEN_WIDTH = dm.widthPixels;
-		SCREEN_HEIGHT = dm.heightPixels;
+        initGameData();
 		
-		// 这里先初始化一次音效
-		SoundEngine.getSoundEngine();
-				
-		// 初始化按钮
-		buttonClassic = (Button) findViewById(R.id.classic_black_button);
-		buttonFaster = (Button) findViewById(R.id.faster_white_button);
-		buttonZen = (Button) findViewById(R.id.zen_white_button);
-		buttonMusic = (Button) findViewById(R.id.music_black_button);
-		
-		gameView = (GameView) findViewById(R.id.gameview);
-		
-		buttonClassic.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View view) {
-				showButtonOutAnim();
-				gameView.startGame(GameMode.GAME_CLASSIC);
-			}
-		});
+        initUI();
+    }
+    
+    private void initGameData() {
+    	// 获取屏幕大小
+    	DisplayMetrics dm = new DisplayMetrics();
+    	getWindowManager().getDefaultDisplay().getMetrics(dm);
+    	SCREEN_WIDTH = dm.widthPixels;
+    	SCREEN_HEIGHT = dm.heightPixels;
 
-		buttonFaster.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				showButtonOutAnim();
-				gameView.startGame(GameMode.GAME_FASTER);
-			}
-		});
-
-		buttonZen.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				showButtonOutAnim();
-				gameView.startGame(GameMode.GAME_Zen);
-			}
-		});
-
-		buttonMusic.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				if (SoundEngine.getSoundEngine().isOn()) {
-					SoundEngine.getSoundEngine().setOn(false);
-					buttonMusic.setText("静音");
-				} else {
-					SoundEngine.getSoundEngine().setOn(true);
-					buttonMusic.setText("琴声");
-				}
-			}
-		});
-		
-		
-		
-		Intent intent = getIntent();
+    	// 由于音效需要加载一堆声音，因此这里先初始化一次音效
+    	SoundEngine.getSoundEngine();
+    			
+    	// 判断是否是重新开始的游戏
+    	Intent intent = getIntent();
 		boolean isRestartGame = intent.getBooleanExtra(DATA_IS_GAME_RESTART, false);
 		if (isRestartGame) {
-			GameMode gameMode = (GameMode) intent.getSerializableExtra(DATA_GAME_MODE);
+			// 按钮归位，由于是FrameLayout，进行游戏的时候，按钮设置坐标到屏幕之外了
 			backToGame();
+			
+			GameMode gameMode = (GameMode) intent.getSerializableExtra(DATA_GAME_MODE);
 			gameView.startGame(gameMode);
 		}
     }
     
-    public static MainActivity getMainActivity() {
-    	return mainActivity;
+    private void initUI() {
+    	// 初始化按钮
+    	buttonClassic = (Button) findViewById(R.id.classic_black_button);
+    	buttonFaster = (Button) findViewById(R.id.faster_white_button);
+    	buttonZen = (Button) findViewById(R.id.zen_white_button);
+    	buttonMusic = (Button) findViewById(R.id.music_black_button);
+
+    	gameView = (GameView) findViewById(R.id.gameview);
+
+    	buttonClassic.setOnClickListener(new OnClickListener() {
+
+    		@Override
+    		public void onClick(View view) {
+    			showButtonOutAnim();
+    			gameView.startGame(GameMode.GAME_CLASSIC);
+    		}
+    	});
+
+    	buttonFaster.setOnClickListener(new OnClickListener() {
+
+    		@Override
+    		public void onClick(View view) {
+    			showButtonOutAnim();
+    			gameView.startGame(GameMode.GAME_FASTER);
+    		}
+    	});
+
+    	buttonZen.setOnClickListener(new OnClickListener() {
+
+    		@Override
+    		public void onClick(View view) {
+    			showButtonOutAnim();
+    			gameView.startGame(GameMode.GAME_Zen);
+    		}
+    	});
+
+    	buttonMusic.setOnClickListener(new OnClickListener() {
+
+    		@Override
+    		public void onClick(View view) {
+    			if (SoundEngine.getSoundEngine().isOn()) {
+    				SoundEngine.getSoundEngine().setOn(false);
+    				buttonMusic.setText("静音");
+    			} else {
+    				SoundEngine.getSoundEngine().setOn(true);
+    				buttonMusic.setText("琴声");
+    			}
+    		}
+    	});
     }
     
     /**
@@ -177,5 +172,21 @@ public class MainActivity extends Activity {
 		buttonZen.setEnabled(false);
 		buttonMusic.setEnabled(false);
 	}
+	
+	// 这两个数据仅仅从WinOrLoseActivity中传过来
+	private static final String DATA_GAME_MODE = "GameMode";
+	private static final String DATA_IS_GAME_RESTART = "GameRestart";
+	
+	// 获取屏幕大小，直接变成共有方便使用，暂时就简单放在在此文件中
+	public static int SCREEN_WIDTH;
+	public static int SCREEN_HEIGHT;
+	
+	private static MainActivity mainActivity;
+	
+	private Button buttonClassic;
+	private Button buttonFaster;
+	private Button buttonZen;
+	private Button buttonMusic;
+	private GameView gameView;
 }
 

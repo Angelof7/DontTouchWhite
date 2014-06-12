@@ -14,26 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class WinOrLoseActivity extends Activity {
-
-	GameRecord gameRecord;
-	
-	private static final String DATA_GAME_MODE = "GameMode";
-	private static final String DATA_IS_GAME_RESTART = "GameRestart";
-	
-	private GameMode gameMode;
-	private GameState gameState;
-	private float timeRecord;
-	private int blockRecord;
-	
-	private LinearLayout mainLayout;
-	private Button buttonRestart;
-	private Button buttonShare;
-	private Button buttonBack;
-	private TextView textGameMode;
-	private TextView textNewRecordTitle;
-	private TextView textFailTitle;
-	private TextView textRecord;
-	private TextView textBestRecord;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -200,4 +180,28 @@ public class WinOrLoseActivity extends Activity {
 		super.onPause();
 		GameRecordKeeper.writeGameRecord(this, gameRecord);
 	}
+	
+	// 用于记录整个游戏的排行数据，通过SharedPerference中保存
+	GameRecord gameRecord;
+	
+	// 传出的游戏数据名称
+	private static final String DATA_GAME_MODE = "GameMode";
+	private static final String DATA_IS_GAME_RESTART = "GameRestart";
+	
+	// 传来的游戏数据
+	private GameMode gameMode;
+	private GameState gameState;
+	private float timeRecord;
+	private int blockRecord;
+	
+	// UI Handler
+	private LinearLayout mainLayout;
+	private Button buttonRestart;
+	private Button buttonShare;
+	private Button buttonBack;
+	private TextView textGameMode;
+	private TextView textNewRecordTitle;
+	private TextView textFailTitle;
+	private TextView textRecord;
+	private TextView textBestRecord;
 }
