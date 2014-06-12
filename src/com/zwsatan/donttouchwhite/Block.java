@@ -26,7 +26,9 @@ public class Block {
 	
 	// 记录黑块被点击动画的缩放的效果
 	private float scaleForBlackTouched;
+	// 记录白块被点击时动画的红白红白变效果
 	private int animForWhiteTouched;
+	// 记录黑块漏点的情况下的动画效果，仅在经典模式下
 	private int animForBlackNotTouched = 0;
 	
 	// 记录是否为起始方块，就是有两字开始
@@ -44,7 +46,6 @@ public class Block {
 		this.isStartBlock = false;
 	}
 
-	
 	public void setStartBlock(boolean isStartBlock) {
 		this.isStartBlock = isStartBlock;
 	}
@@ -73,7 +74,6 @@ public class Block {
 	}
 	
 	public void draw(Canvas canvas, Paint paint) {
-		
 		paint.setColor(color);
 		paint.setStyle(Style.FILL);
 		canvas.drawRect(x,  y, x + width, y + height, paint);
@@ -87,6 +87,7 @@ public class Block {
 		
 		drawBlackTouchAnim(scaleForBlackTouched, canvas, paint);
 		
+		// 绘制开始方块
 		if (isStartBlock) {
 			paint.setColor(Color.WHITE);
 			paint.setTextSize(48);
@@ -94,7 +95,6 @@ public class Block {
 			canvas.drawText("开始", x + width / 2, y + height / 2, paint);
 		}
 	}
-	
 	
 	public void startBlackAnim() {
 		ValueAnimator animator = ValueAnimator.ofFloat(0.7f, 1.0f);
@@ -114,7 +114,6 @@ public class Block {
 		
 		SoundEngine.getSoundEngine().playPianoSound();
 	}
-	
 	
 	public void startBlackNotTouchedAnim() {
 		animForBlackNotTouched = 0;
@@ -154,16 +153,6 @@ public class Block {
 				}
 			}
 		}, 0, 50);
-		
-//		ValueAnimator animator = ValueAnimator.ofInt(Color.RED, Color.WHITE, Color.RED, Color.WHITE, Color.RED);
-//		animator.addUpdateListener(new AnimatorUpdateListener() {
-//			
-//			@Override
-//			public void onAnimationUpdate(ValueAnimator animator) {
-//				color = (Integer) animator.getAnimatedValue();
-//			}
-//		});
-//		animator.setDuration(200).start();
 	}
 	
 	public void drawBlackTouchAnim(float scale, Canvas canvas, Paint paint) {
@@ -177,19 +166,5 @@ public class Block {
 		paint.setStyle(Style.FILL);
 		canvas.drawRect(newX, newY, newX + newWidth, newY + newHeight, paint);
 	}
-	
-//	public boolean onTouch(float touchX, float touchY) {
-//		if (contains(touchX, touchY)) {
-//			if (color == Color.BLACK) {
-//				startBlackAnim();
-//			} else if (color == Color.WHITE) {
-//				startWhiteAnim();
-//			}
-//			
-//			return true;
-//		}
-//		
-//		return false;
-//	}
 	
 }

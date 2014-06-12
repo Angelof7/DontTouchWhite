@@ -19,6 +19,14 @@ public class WinOrLoseActivity extends Activity {
 
 	GameRecord gameRecord;
 	
+	private static final String DATA_GAME_MODE = "GameMode";
+	private static final String DATA_IS_GAME_RESTART = "GameRestart";
+	
+	private GameMode gameMode;
+	private GameState gameState;
+	private float timeRecord;
+	private int blockRecord;
+	
 	private LinearLayout mainLayout;
 	private Button buttonRestart;
 	private Button buttonShare;
@@ -39,28 +47,51 @@ public class WinOrLoseActivity extends Activity {
 		
 		setContentView(R.layout.win_lose);
 		
+		initGameStatus();
+		initUI();
+		initButton();
+		
+		handleGameMode();
+	}
+	
+	/**
+	 * 获取从GameView传来的数据
+	 */
+	private void initGameStatus() {
 		gameRecord = GameRecordKeeper.readGameRecord(this);
 		
 		Intent intent = getIntent();
-		final GameMode gameMode = (GameMode) intent.getSerializableExtra("GameMode");
-		final GameState gameState = (GameState) intent.getSerializableExtra("GameState");
+		gameMode = (GameMode) intent.getSerializableExtra("GameMode");
+		gameState = (GameState) intent.getSerializableExtra("GameState");
 		
-		
+		timeRecord = intent.getFloatExtra("TimeRecord", 9999f);
+		blockRecord = intent.getIntExtra("BlockRecord", 0);
+	}
+	
+	/**
+	 * 初始化界面UI handler
+	 */
+	private void initUI() {
 		mainLayout = (LinearLayout) findViewById(R.id.win_lose_dialog);
 		textGameMode = (TextView) findViewById(R.id.text_game_mode);
 		textNewRecordTitle = (TextView) findViewById(R.id.text_new_record_title);
 		textFailTitle = (TextView) findViewById(R.id.text_fail_title);
 		textRecord = (TextView) findViewById(R.id.text_record);
 		textBestRecord = (TextView) findViewById(R.id.text_best__record);
-		
+	}
+	
+	/**
+	 * 初始化界面按钮及监听器
+	 */
+	private void initButton() {
 		buttonRestart = (Button) findViewById(R.id.button_restart);
 		buttonRestart.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View view) {
 				Intent intent = new Intent(WinOrLoseActivity.this, MainActivity.class);
-				intent.putExtra("RestartGame", true);
-				intent.putExtra("GameMode", gameMode);
+				intent.putExtra(DATA_IS_GAME_RESTART, true);
+				intent.putExtra(DATA_GAME_MODE, gameMode);
 				startActivity(intent);
 			}
 		});
@@ -83,58 +114,19 @@ public class WinOrLoseActivity extends Activity {
 				startActivity(new Intent(WinOrLoseActivity.this, MainActivity.class));
 			}
 		});
-		
+	}
+
+	private void handleGameMode() {
 		if (gameMode == GameMode.GAME_CLASSIC) {
-			// 事实上，只有此模式下，点击会出现失败的现象
-			textGameMode.setText("经典模式");
-			
-			float timeRecord = intent.getFloatExtra("TimeRecord", 0f);
-			
-			if (gameState == GameState.GAME_WIN) {
-				if (timeRecord < gameRecord.classicRecord) {
-					// 记录最佳时间
-					textRecord.setText(timeRecord + "\"");
-					gameRecord.classicRecord = timeRecord;
-					showNewRecord();
-				} else {
-					textRecord.setText(timeRecord + "\"");
-					textBestRecord.setText("骄人战绩：" + gameRecord.classicRecord + "\"");
-					showNormalWin();
-				}
-			} else if (gameState == GameState.GAME_OVER) {
-				showLose();
-			}
+			showClassic();
 		} else if (gameMode == GameMode.GAME_FASTER) {
-			textGameMode.setText("街机模式");
-			
-			int blockRecord = intent.getIntExtra("BlockRecord", 0);
-			if (blockRecord > gameRecord.fasterRecord) {
-				textRecord.setText(blockRecord + "");
-				gameRecord.fasterRecord = blockRecord;
-				showNewRecord();
-			} else {
-				textRecord.setText(blockRecord + "");
-				textBestRecord.setText("骄人战绩：" + gameRecord.fasterRecord + "");
-				showNormalWin();
-			}
+			showFaster();
 		} else if (gameMode == GameMode.GAME_Zen) {
-			textGameMode.setText("禅模式");
-
-			int blockRecord = intent.getIntExtra("BlockRecord", 0);
-			if (blockRecord > gameRecord.zenRecord) {
-				textRecord.setText(blockRecord + "");
-				gameRecord.zenRecord = blockRecord;
-				showNewRecord();
-			} else {
-				textRecord.setText(blockRecord + "");
-				textBestRecord.setText("骄人战绩：" + gameRecord.zenRecord + "");
-				showNormalWin();
-			}
+			showZen();
 		}
-
 	}
 	
-	private void showNormalWin() {
+	private void showNormalWin(String record, String bestRecord) {
 		mainLayout.setBackgroundColor(getResources().getColor(R.color.normallack));
 		buttonShare.setBackgroundColor(getResources().getColor(R.color.normallack));
 		buttonBack.setBackgroundColor(getResources().getColor(R.color.normallack));
@@ -142,10 +134,12 @@ public class WinOrLoseActivity extends Activity {
 		textNewRecordTitle.setVisibility(TextView.GONE);
 		textFailTitle.setVisibility(TextView.GONE);
 		textRecord.setVisibility(TextView.VISIBLE);
+		textRecord.setText(record);
 		textBestRecord.setVisibility(TextView.VISIBLE);
+		textBestRecord.setText("骄人战绩：" + bestRecord);
 	}
 	
-	private void showNewRecord() {
+	private void showNewRecord(String newRecord) {
 		SoundEngine.getSoundEngine().playWinSound();
 		
 		mainLayout.setBackgroundColor(getResources().getColor(R.color.nicegreen));
@@ -153,8 +147,9 @@ public class WinOrLoseActivity extends Activity {
 		buttonBack.setBackgroundColor(getResources().getColor(R.color.nicegreen));
 		
 		textNewRecordTitle.setVisibility(TextView.VISIBLE);
+		textNewRecordTitle.setText(newRecord);
 		textFailTitle.setVisibility(TextView.GONE);
-		textRecord.setVisibility(TextView.VISIBLE);
+		textRecord.setVisibility(TextView.GONE);
 		textBestRecord.setVisibility(TextView.GONE);
 	}
 	
@@ -167,6 +162,44 @@ public class WinOrLoseActivity extends Activity {
 		textFailTitle.setVisibility(TextView.VISIBLE);
 		textRecord.setVisibility(TextView.GONE);
 		textBestRecord.setVisibility(TextView.GONE);
+	}
+	
+	private void showClassic() {
+		// 事实上，只有此模式下，点击会出现失败的现象
+		textGameMode.setText("经典模式");
+
+		if (gameState == GameState.GAME_WIN) {
+			if (timeRecord < gameRecord.classicRecord) {
+				gameRecord.classicRecord = timeRecord;
+				showNewRecord(timeRecord + "\"");
+			} else {
+				showNormalWin(timeRecord + "\"", gameRecord.classicRecord + "\"");
+			}
+		} else if (gameState == GameState.GAME_OVER){
+			showLose();
+		}
+	}
+	
+	private void showFaster() {
+		textGameMode.setText("街机模式");
+		
+		if (blockRecord > gameRecord.fasterRecord) {
+			gameRecord.fasterRecord = blockRecord;
+			showNewRecord(blockRecord + "");
+		} else {
+			showNormalWin(blockRecord + "", gameRecord.fasterRecord + "");
+		}
+	}
+	
+	private void showZen() {
+		textGameMode.setText("禅模式");
+
+		if (blockRecord > gameRecord.zenRecord) {
+			gameRecord.zenRecord = blockRecord;
+			showNewRecord(blockRecord + "");
+		} else {
+			showNormalWin(blockRecord + "", gameRecord.zenRecord + "");
+		}
 	}
 	
 	@Override

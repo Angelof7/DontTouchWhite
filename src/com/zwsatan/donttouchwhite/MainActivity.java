@@ -17,6 +17,9 @@ import com.zwsatan.donttouchwhite.GameView.GameMode;
 
 public class MainActivity extends Activity {
 
+	private static final String DATA_GAME_MODE = "GameMode";
+	private static final String DATA_IS_GAME_RESTART = "GameRestart";
+	
 	public static int SCREEN_WIDTH;
 	public static int SCREEN_HEIGHT;
 	
@@ -103,9 +106,9 @@ public class MainActivity extends Activity {
 		
 		
 		Intent intent = getIntent();
-		boolean isRestartGame = intent.getBooleanExtra("RestartGame", false);
+		boolean isRestartGame = intent.getBooleanExtra(DATA_IS_GAME_RESTART, false);
 		if (isRestartGame) {
-			GameMode gameMode = (GameMode) intent.getSerializableExtra("GameMode");
+			GameMode gameMode = (GameMode) intent.getSerializableExtra(DATA_GAME_MODE);
 			backToGame();
 			gameView.startGame(gameMode);
 		}
