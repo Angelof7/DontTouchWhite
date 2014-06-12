@@ -16,7 +16,6 @@ public class SoundEngine {
 	}
 
 	private SoundEngine() {
-		// 鍒濆鍖栭煶鏁�
 		winSound = soundPool.load(MainActivity.getMainActivity(), R.raw.win, 1);
 		errorSound = soundPool.load(MainActivity.getMainActivity(), R.raw.error, 1);
 
@@ -31,7 +30,7 @@ public class SoundEngine {
 		};
 
 		Random random = new Random();
-		currentMusicIndex = random.nextInt(2);
+		currentMusicIndex = random.nextInt(MUSIC.length - 1);
 		currentMusicSoundIndex = 0;
 	}
 
