@@ -40,13 +40,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	private GameState gameState = GameState.GAME_UNSTART;
 
 	// 共有参数
-	private static final int THREAD_SLEEP_TIME = 20;	// 控制所有线材睡眠15ms，即50帧
+	private static final int THREAD_SLEEP_TIME = 20;	// 控制所有线材睡眠20ms，即50帧
 	private float speed;					// 控制各个游戏模式下的方块下落速度
-	public static float speedAcc;			// 控制各个游戏模式下方块下落的加速度
+	private float speedAcc;					// 控制各个游戏模式下方块下落的加速度
 	
 	// 经典模式下的参数
     private ClassicThread drawThread;		// 绘制线程
-    private static final int WIN_LINES = 15;// 胜利所需要的所有行数
+    private static final int WIN_LINES = 50;// 胜利所需要的所有行数
     private int lineCounts;					// 记录现在一共鼓了多少行
     private int endLineCounts;				// 记录结束行出现了多少行
     private long timeStart;					// 记录游戏起始时间

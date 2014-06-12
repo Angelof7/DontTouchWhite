@@ -7,10 +7,8 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 
 import com.zwsatan.donttouchwhite.GameView.GameMode;
@@ -38,11 +36,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // 设置全屏    
-        requestWindowFeature(Window.FEATURE_NO_TITLE);    
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams. FLAG_FULLSCREEN);
-        
         setContentView(R.layout.activity_main);
 
         // 获取屏幕大小
