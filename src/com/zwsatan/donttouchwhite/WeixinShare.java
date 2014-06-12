@@ -9,15 +9,6 @@ import com.tencent.mm.sdk.openapi.WXImageObject;
 import com.tencent.mm.sdk.openapi.WXMediaMessage;
 
 public class WeixinShare {
-
-	private static WeixinShare share = null;
-	
-	private static final String APP_ID = "wxa7c357e6c138daae";
-	private static final int SMALL_WIDTH = 150;
-	private static final int SMALL_HEIGHT = 260;
-	
-	
-	private IWXAPI api;
 	
 	public static WeixinShare getWeixinShare() {
 		if (share == null) {
@@ -55,4 +46,11 @@ public class WeixinShare {
 		return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();
 	}
 	
+	private static WeixinShare share = null;
+
+	private static final String APP_ID = "wxa7c357e6c138daae";
+	private static final int SMALL_WIDTH = 150;
+	private static final int SMALL_HEIGHT = 260;
+
+	private IWXAPI api;
 }
