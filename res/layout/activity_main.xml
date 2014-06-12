@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:baiduadsdk="http://schemas.android.com/apk/res/com.zwsatan.donttouchwhite"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.zwsatan.donttouchwhite.GameView
-        android:id="@+id/gameview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </com.zwsatan.donttouchwhite.GameView>
-    
+     <com.zwsatan.donttouchwhite.GameView
+         android:id="@+id/gameview"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent" >
+     </com.zwsatan.donttouchwhite.GameView>
+        
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
@@ -68,6 +69,7 @@
                 android:textColor="@android:color/white"
                 android:textSize="48sp" />
         </LinearLayout>
+        
     </LinearLayout>
-    
+
 </FrameLayout>
