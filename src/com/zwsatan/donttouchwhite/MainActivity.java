@@ -48,6 +48,9 @@ public class MainActivity extends Activity {
 		SCREEN_WIDTH = dm.widthPixels;
 		SCREEN_HEIGHT = dm.heightPixels;
 		
+		// 这里先初始化一次音效
+		SoundEngine.getSoundEngine();
+				
 		// 初始化按钮
 		buttonClassic = (Button) findViewById(R.id.classic_black_button);
 		buttonFaster = (Button) findViewById(R.id.faster_white_button);
@@ -87,12 +90,17 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View view) {
-				// 音乐暂时不处理
+				if (SoundEngine.getSoundEngine().isOn()) {
+					SoundEngine.getSoundEngine().setOn(false);
+					buttonMusic.setText("静音");
+				} else {
+					SoundEngine.getSoundEngine().setOn(true);
+					buttonMusic.setText("琴声");
+				}
 			}
 		});
 		
-		// 这里先初始化一次音效
-		SoundEngine.getSoundEngine();
+		
 		
 		Intent intent = getIntent();
 		boolean isRestartGame = intent.getBooleanExtra("RestartGame", false);

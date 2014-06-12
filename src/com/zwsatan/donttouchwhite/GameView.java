@@ -85,21 +85,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         drawThread = new ClassicThread(holder);//创建一个绘图线程
         moveThread = new FasterThread(holder);
         zenThread = new ZenThread(holder);
-        
-//        if (gameMode == GameMode.GAME_CLASSIC) {
-//        	gameState = GameState.GAME_START;
-//        	startClassicGame();
-//        } else if (gameMode == GameMode.GAME_FASTER) {
-//        	gameState = GameState.GAME_START;
-//        	startFasterGame();
-//        } else if (gameMode == GameMode.GAME_Zen) {
-//        	gameState = GameState.GAME_START;
-//        	startZenGame();
-//        }
 	}
 	
 	public void startGame(GameMode mode) {
 		gameMode = mode;
+		
+		if (mode == GameMode.GAME_NONE) {
+			return;
+		}
 		
 		if (gameMode == GameMode.GAME_CLASSIC) {
         	gameState = GameState.GAME_START;
@@ -249,8 +242,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	private void startFasterGame() {
 		blockRecord = 0;
 		
-		speed = 17f;
-		speedAcc = 0.07f;
+		speed = 25f;
+		speedAcc = 0.02f;
 		
 		initFasterTouchListner();
 		
@@ -305,12 +298,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 							}
 						}
 					} else {
-						// 这里需要检查从是否有方块漏掉
+						
 						for (Block block : blocks) {
 							if (block.contains(touchX, touchY)) {
 								if (block.getColor() == Color.BLACK) {
 									block.startBlackAnim();
 									blockRecord++;
+									
+									if (blockRecord % 5 == 0) {
+										speedAcc += 0.0005f;
+									}
 								} else if (block.getColor() == Color.WHITE) {
 									block.startWhiteAnim();
 									setGameOver();
@@ -322,22 +319,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 							}
 						}
 					}
-					
-//					for (Block block : blocks) {
-//						if (block.contains(touchX, touchY)) {
-//							if (block.getColor() == Color.BLACK) {
-//								block.startBlackAnim();
-//								blockRecord++;
-//							} else if (block.getColor() == Color.WHITE) {
-//								block.startWhiteAnim();
-//								gameState = GameState.GAME_OVER;
-//								showWinOrLose();
-//								return true;
-//							}
-//							
-//							break;
-//						}
-//					}
 				}
 				return true;
 			}

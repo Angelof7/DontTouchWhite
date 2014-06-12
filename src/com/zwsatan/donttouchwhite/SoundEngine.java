@@ -64,8 +64,8 @@ public class SoundEngine {
 			soundPool.load(MainActivity.getMainActivity(), R.raw.soundz, 1)
 		};
 		
-		Random random = new Random(); 
-		currentMusicIndex = 0;//random.nextInt(2);
+		Random random = new Random();
+		currentMusicIndex = random.nextInt(2);
 		currentMusicSoundIndex = 0;
 	}
 		
@@ -73,6 +73,10 @@ public class SoundEngine {
 		this.isOn = isOn;
 	}
 
+	public boolean isOn() {
+		return isOn;
+	}
+	
 	public void playWinSound() {
 		if (isOn) {
 			soundPool.play(winSound, 1, 1, 0, 0, 1);
@@ -91,7 +95,7 @@ public class SoundEngine {
 			
 			if (isMusicDone) {
 				Random random = new Random(); 
-				currentMusicIndex = 0;//random.nextInt(2);
+				currentMusicIndex = random.nextInt(2);
 				currentMusicSoundIndex = 0;
 			}
 			
