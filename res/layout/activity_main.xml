@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <com.zwsatan.donttouchwhite.GameView
+        android:id="@+id/gameview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </com.zwsatan.donttouchwhite.GameView>
+    
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/classic_black_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/black"
+                android:text="经典"
+                android:textColor="@android:color/white"
+                android:textSize="48sp" />
+
+            <Button
+                android:id="@+id/faster_white_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/white"
+                android:text="街机"
+                android:textColor="@android:color/black"
+                android:textSize="48sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/zen_white_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/white"
+                android:text="禅"
+                android:textColor="@android:color/black"
+                android:textSize="48sp" />
+
+            <Button
+                android:id="@+id/music_black_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/black"
+                android:text="琴声"
+                android:textColor="@android:color/white"
+                android:textSize="48sp" />
+        </LinearLayout>
+    </LinearLayout>
+    
+</FrameLayout>

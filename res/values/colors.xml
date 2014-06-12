@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="skyblue">#5CACEE</color>
+    <color name="nicegreen">#458B74</color>
+    <color name="niceblack">#292929</color>
+    <color name="loserred">#8B1A1A</color>
+    <color name="normallack">#2E2E2E</color>
+    
+</resources>
