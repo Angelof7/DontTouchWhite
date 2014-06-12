@@ -1,10 +1,8 @@
 package com.zwsatan.donttouchwhite;
 
-import com.zwsatan.donttouchwhite.GameView.GameMode;
-import com.zwsatan.donttouchwhite.GameView.GameState;
-
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -12,7 +10,10 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.tencent.mm.sdk.openapi.SendMessageToWX;
+import com.zwsatan.donttouchwhite.GameView.GameMode;
+import com.zwsatan.donttouchwhite.GameView.GameState;
 
 public class WinOrLoseActivity extends Activity {
 	
@@ -90,7 +91,8 @@ public class WinOrLoseActivity extends Activity {
 			
 			@Override
 			public void onClick(View view) {
-				Toast.makeText(WinOrLoseActivity.this, "Comming soon...", Toast.LENGTH_SHORT).show();
+				Bitmap screenBitmap = Util.shareScreen(WinOrLoseActivity.this);
+				WeixinShare.getWeixinShare().sendReq(screenBitmap, SendMessageToWX.Req.WXSceneTimeline);
 			}
 		});
 
