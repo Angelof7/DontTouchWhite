@@ -1,13 +1,17 @@
 package com.zwsatan.donttouchwhite;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -21,6 +25,8 @@ public class WinOrLoseActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.win_lose);
+		
+		activity = this;
 		
 		initGameStatus();
 		initUI();
@@ -91,8 +97,9 @@ public class WinOrLoseActivity extends Activity {
 			
 			@Override
 			public void onClick(View view) {
-				Bitmap screenBitmap = Util.shareScreen(WinOrLoseActivity.this);
-				WeixinShare.getWeixinShare().sendReq(screenBitmap, SendMessageToWX.Req.WXSceneTimeline);
+				screenBitmap = Util.shareScreen(activity);
+				fragment = new ShareFragment();
+				getFragmentManager().beginTransaction().add(R.id.share_layout, fragment).commit();
 			}
 		});
 
@@ -105,6 +112,52 @@ public class WinOrLoseActivity extends Activity {
 			}
 		});
 	}
+	
+	public static class ShareFragment extends Fragment {
+
+        public ShareFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.share_fragement, container, false);
+            
+            ImageButton shareSessionButton = (ImageButton) rootView.findViewById(R.id.share_weixin_session_button);
+            shareSessionButton.getBackground().setAlpha(0);
+            shareSessionButton.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View view) {
+					WeixinShare.getWeixinShare().sendReq(screenBitmap, SendMessageToWX.Req.WXSceneSession);
+					activity.getFragmentManager().beginTransaction().remove(fragment).commit();
+				}
+			});
+            
+            ImageButton shareTimelineButton = (ImageButton) rootView.findViewById(R.id.share_weixin_timeline_button);
+            shareTimelineButton.getBackground().setAlpha(0);
+            shareTimelineButton.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View view) {
+					WeixinShare.getWeixinShare().sendReq(screenBitmap, SendMessageToWX.Req.WXSceneTimeline);
+					activity.getFragmentManager().beginTransaction().remove(fragment).commit();
+				}
+			});
+            
+            Button cancelButton = (Button) rootView.findViewById(R.id.cancel_button);
+            cancelButton.getBackground().setAlpha(0);
+            cancelButton.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View view) {
+					activity.getFragmentManager().beginTransaction().remove(fragment).commit();
+				}
+			});
+            
+            return rootView;
+        }
+    }
 
 	private void handleGameMode() {
 		if (gameMode == GameMode.GAME_CLASSIC) {
@@ -221,4 +274,8 @@ public class WinOrLoseActivity extends Activity {
 	private TextView textFailTitle;
 	private TextView textRecord;
 	private TextView textBestRecord;
+	
+	private static Bitmap screenBitmap;
+	private static ShareFragment fragment;
+	private static WinOrLoseActivity activity;
 }

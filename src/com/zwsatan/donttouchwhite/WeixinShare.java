@@ -25,14 +25,13 @@ public class WeixinShare {
 	}
 	
 	public void sendReq(Bitmap bitmap, int scene) {
-
+		 
 		WXImageObject imgObj = new WXImageObject(bitmap);
 		
 		WXMediaMessage msg = new WXMediaMessage();
 		msg.mediaObject = imgObj;
 		
 		Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, SMALL_WIDTH, SMALL_HEIGHT, true);
-		bitmap.recycle();
 		msg.thumbData = Util.bmpToByteArray(thumbBmp, true);
 
 		SendMessageToWX.Req req = new SendMessageToWX.Req();

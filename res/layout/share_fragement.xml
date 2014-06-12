@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lightwhite"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="分享到"
+        android:textSize="30sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/share_weixin_timeline_button"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:contentDescription="微信朋友圈"
+            android:scaleType="centerInside"
+            android:src="@drawable/weixin_timeline" />
+
+        <ImageButton
+            android:id="@+id/share_weixin_session_button"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:contentDescription="微信好友"
+            android:scaleType="centerInside"
+            android:src="@drawable/weixin_session" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/sharegrey" />
+
+    <Button
+        android:id="@+id/cancel_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="取消"
+        android:textSize="24sp" />
+
+</LinearLayout>
