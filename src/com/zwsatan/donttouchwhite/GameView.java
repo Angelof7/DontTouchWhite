@@ -35,43 +35,90 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void initGameView() {
-		holder = this.getHolder();
+		holder = getHolder();
         holder.addCallback(this);
-        drawThread = new ClassicThread(holder);//创建一个绘图线程
-        moveThread = new FasterThread(holder);
-        zenThread = new ZenThread(holder);
+        
+        fasterThread = new FasterThread(holder);
+        classicOrzenThread = new ClassicOrZenThread(holder);
 	}
 	
 	public void startGame(GameMode mode) {
 		gameMode = mode;
 		
-		if (mode == GameMode.GAME_NONE) {
+		if (gameMode == GameMode.GAME_NONE) {
 			return;
 		}
 		
+		gameState = GameState.GAME_START;
+		
 		if (gameMode == GameMode.GAME_CLASSIC) {
-        	gameState = GameState.GAME_START;
-        	drawThread.isRun = true;
-			drawThread.start();
         	startClassicGame();
         } else if (gameMode == GameMode.GAME_FASTER) {
-        	gameState = GameState.GAME_START;
-        	moveThread.isRun = true;
-			moveThread.start();	
         	startFasterGame();
         } else if (gameMode == GameMode.GAME_Zen) {
-        	zenThread.isRun = true;
-			zenThread.start();
-        	gameState = GameState.GAME_START;
         	startZenGame();
         }
 		
-		if (gameState == GameState.GAME_START) {
-			for (Block block : blocks) {
-				if (block.getColor() == Color.BLACK) {
-					block.setStartBlock(true);
-					break;
-				}
+		addStartLine();
+		addNormalLine();
+		addNormalLine();
+		addNormalLine();
+		
+		initStartBlock();
+	}
+	
+	private void startFasterGame() {
+		fasterThread.isRun = true;
+		fasterThread.start();	
+		
+		blockRecord = 0;
+		
+		speed = 25f;
+		speedAcc = 0.02f;
+		
+		initFasterTouchListner();
+	}
+	
+	private void startZenGame() {
+		classicOrzenThread.isRun = true;
+		classicOrzenThread.start();
+		
+		timeRecord = 0;
+		timeStart = 0;
+		timeTotal = 30;
+		blockRecord = 0;
+		
+		speed = MainActivity.SCREEN_HEIGHT / 4;
+		speedAcc = 0f;
+		
+		initClassicOrZenTouchListener();
+	}
+	
+	private void startClassicGame() {
+		classicOrzenThread.isRun = true;
+		classicOrzenThread.start();
+		
+		lineCounts = 0;
+		endLineCounts = 0;
+		
+		timeRecord = 0;
+		timeStart = System.currentTimeMillis();
+		timeTotal = 0;
+		
+		speed = MainActivity.SCREEN_HEIGHT / 4;
+		speedAcc = 0f;
+		
+		initClassicOrZenTouchListener();
+	}
+	
+	/**
+	 * 设置起始方块，基本作用就是有开始两字
+	 */
+	private void initStartBlock() {
+		for (Block block : blocks) {
+			if (block.getColor() == Color.BLACK) {
+				block.setStartBlock(true);
+				break;
 			}
 		}
 	}
@@ -82,78 +129,54 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder arg0) {
-		if (gameMode == GameMode.GAME_CLASSIC) {
-			drawThread.isRun = false;
-		} else if (gameMode == GameMode.GAME_FASTER) {
-			moveThread.isRun = false;
-		} else if (gameMode == GameMode.GAME_Zen) {
-			zenThread.isRun = false;
+		if (gameMode == GameMode.GAME_FASTER) {
+			fasterThread.isRun = false;
+		} else if (gameMode == GameMode.GAME_Zen || gameMode == GameMode.GAME_CLASSIC) {
+			classicOrzenThread.isRun = false;
 		}
 		
+		gameMode = GameMode.GAME_NONE;
+		gameState = GameState.GAME_UNSTART;
 		blocks.clear();
 	}
 	
 	@Override
 	public void surfaceCreated(SurfaceHolder arg0) {
-		if (gameMode == GameMode.GAME_CLASSIC) {
-			drawThread.isRun = true;
-			if (!drawThread.isAlive()) {
-				drawThread.start();
+		if (gameMode == GameMode.GAME_FASTER) {
+			fasterThread.isRun = true;
+			if (!fasterThread.isAlive()) {
+				fasterThread.start();	
 			}
-		} else if (gameMode == GameMode.GAME_FASTER) {
-			moveThread.isRun = true;
-			if (!moveThread.isAlive()) {
-				moveThread.start();	
-			}
-		} else if (gameMode == GameMode.GAME_Zen) {
-			zenThread.isRun = true;
-			if (!zenThread.isAlive()) {
-				zenThread.start();
+		} else if (gameMode == GameMode.GAME_Zen || gameMode == GameMode.GAME_CLASSIC) {
+			classicOrzenThread.isRun = true;
+			if (!classicOrzenThread.isAlive()) {
+				classicOrzenThread.start();
 			}
 		}
 	}
 	
 	private void moveDown() {
-		// 所有方块下移
+		// 1、所有方块下移
 		for (Block block : blocks) {
 			block.moveDown(speedAcc);
 		}
 		
-		if (gameMode == GameMode.GAME_FASTER) {
-			for (int i1 = 0; i1 < blocks.size(); ++i1) {
-				final Block block = blocks.get(i1);
-				if (block.getY() >= MainActivity.SCREEN_HEIGHT) {
-
-					// 表示有遗漏的方块没有被消除
-					if (block.getColor() == Color.BLACK) {
-
-						for (int i = 0; i < blocks.size(); ++i) {
-							Block b = blocks.get(i);
-							b.setY(b.getY() - MainActivity.SCREEN_HEIGHT / 4);
-						}
-
-						setGameOver();
-						
-						Timer timer = new Timer();
-						timer.schedule(new TimerTask() {
-							
-							@Override
-							public void run() {
-								block.startBlackNotTouchedAnim();
-							}
-						}, THREAD_SLEEP_TIME + 5);
-						
-						showWinOrLose();
-						return;
-					}
-
-				} else {
-					break;
-				}
-			}
+		// 2、根据游戏状态处理不同规则
+		if (handleExtraRule()) {
+			return;
 		}
 		
-		// 移除出界的行
+		// 3、移除越界的行
+		removeBlockLine();
+		
+		// 4、添加新的行
+		addNewLine();
+	}
+	
+	/**
+	 * 移除出界的行
+	 */
+	private void removeBlockLine() {
 		while (true) {
 			Block block = blocks.get(0);
 			if (block.getY() >= MainActivity.SCREEN_HEIGHT) {
@@ -162,31 +185,91 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 				break;
 			}
 		}
-		
-		// 添加新的行
+	}
+	
+	/**
+	 * 添加新的行
+	 */
+	private void addNewLine() {
 		if (gameMode == GameMode.GAME_CLASSIC) {
-			if (lineCounts < WIN_LINES) {
-				addNormalLine();
-				++lineCounts;
-			} else {
-				addEndLine();
-				++endLineCounts;
-			}
-			
-			if (3 == endLineCounts) {
-				gameState = GameState.GAME_WIN;
-				showWinOrLose();
-			}
+			addClassicNewLine();
 		} else if (gameMode == GameMode.GAME_FASTER) {
-			Block block = blocks.get(blocks.size() - 1);
-			if (block.getY() > 0) {
-				addNormalLine();
-			}
+			addFasterNewLine();
 		} else if (gameMode == GameMode.GAME_Zen) {
-				addNormalLine();
+			addZenNewLine();
+		}
+	}
+	
+	private void addClassicNewLine() {
+		if (lineCounts < WIN_LINES) {
+			addNormalLine();
+			++lineCounts;
+		} else {
+			addEndLine();
+			++endLineCounts;
 		}
 		
-		invalidate();
+		if (3 == endLineCounts) {
+			gameState = GameState.GAME_WIN;
+			showWinOrLose();
+		}
+	}
+	
+	private void addFasterNewLine() {
+		Block block = blocks.get(blocks.size() - 1);
+		if (block.getY() > 0) {
+			addNormalLine();
+		}
+	}
+	
+	private void addZenNewLine() {
+		addNormalLine();
+	}
+	
+	/**
+	 * 根据不同的游戏模式，做规则处理
+	 * 这里其实就只有 街机模式 需要处理
+	 * 当有漏点的方块的时候，游戏会结束
+	 */
+	private boolean handleExtraRule() {
+		if (gameMode == GameMode.GAME_FASTER) {
+			
+			// 方块其实只用检测越界的那一行，也就是前4个
+			for (final Block block : blocks) {
+				if (block.getY() < MainActivity.SCREEN_HEIGHT) {
+					break;
+				}
+				
+				// 表示有遗漏的方块没有被消除，其他被点击的方块会变成灰色
+				if (block.getColor() == Color.BLACK) {
+					
+					// 所有方块先回退一格
+					for (Block tmpBlock : blocks) {
+						tmpBlock.setY(tmpBlock.getY() - MainActivity.SCREEN_HEIGHT / 4);
+					}
+					
+					// 设置游戏结束状态
+					setGameOver();
+					
+					// 设置一个计时器，用来延缓一帧来播放黑块没有被点中的动画
+					Timer timer = new Timer();
+					timer.schedule(new TimerTask() {
+						
+						@Override
+						public void run() {
+							block.startBlackNotTouchedAnim();
+						}
+					}, THREAD_SLEEP_TIME + 5);
+					
+					// 显示游戏结果界面，这里面也是有延缓执行，所以不着急
+					showWinOrLose();
+					return true;
+				}
+					
+			}
+		}
+		
+		return false;
 	}
 	
 	private void setGameOver() {
@@ -194,18 +277,30 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 		SoundEngine.getSoundEngine().playErrorSound();
 	}
 	
-	private void startFasterGame() {
-		blockRecord = 0;
+	/**
+	 * 用来检测其实方块是否被点击
+	 * @return
+	 */
+	private boolean isStartBlockTouched(float touchX, float touchY) {
+		if (isGameRunning()) {
+			return true;
+		}
 		
-		speed = 25f;
-		speedAcc = 0.02f;
+		// 如果游戏没运行，表示一定没有点中方块，这里就来检测这种情况
+		for (int i = 1; i < 5; ++i) {
+			Block block = blocks.get(i);
+			if (block.contains(touchX, touchY) && (block.getColor() == Color.BLACK)) {
+
+				gameState = GameState.GAME_RUNNING;
+				
+				block.startBlackAnim();
+				blockRecord++;
+				
+				return true;
+			}
+		}
 		
-		initFasterTouchListner();
-		
-		addStartLine();
-		addNormalLine();
-		addNormalLine();
-		addNormalLine();
+		return false;
 	}
 	
 	private void initFasterTouchListner() {
@@ -223,37 +318,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 					float touchY = event.getY();
 					
 					// 控制只能点击开始方块
-					if (!isGameRunning()) {
-						int startIndex = 4;
-						if (blocks.get(0).getColor() == Color.YELLOW) {
-							startIndex = 1;
-						}
-
-						for (int i = startIndex; i < startIndex + 4; ++i) {
-							Block block = blocks.get(i);
-							if (block.contains(touchX, touchY)) {
-
-								if (block.getColor() == Color.BLACK) {
-									block.startBlackAnim();
-									blockRecord++;
-
-									// 当点击的第一个黑块时游戏开始
-									if (gameState != GameState.GAME_RUNNING) {
-										gameState = GameState.GAME_RUNNING;
-									}
-
-								} else if (isGameRunning() && block.getColor() == Color.WHITE) {
-									block.startWhiteAnim();
-									setGameOver();
-									showWinOrLose();
-									return true;
-								}
-
-								break;
-							}
-						}
-					} else {
-						
+					if (isStartBlockTouched(touchX, touchY)) {
 						for (Block block : blocks) {
 							if (block.contains(touchX, touchY)) {
 								if (block.getColor() == Color.BLACK) {
@@ -274,38 +339,19 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 							}
 						}
 					}
+
 				}
 				return true;
 			}
 		});
 	}
 	
-	private void startZenGame() {
-		timeRecord = 0;
-		timeStart = 0;
-		blockRecord = 0;
-		
-		speed = MainActivity.SCREEN_HEIGHT / 4;
-		speedAcc = 0f;
-		
-		initZenTouchListener();
-		
-		addStartLine();
-		addNormalLine();
-		addNormalLine();
-		addNormalLine();
-	}
-	
-	private void initZenTouchListener() {
+	private void initClassicOrZenTouchListener() {
 		setOnTouchListener(new OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View view, MotionEvent event) {
-				if (gameState == GameState.GAME_OVER) {
-					return true;
-				}
-				
-				if (gameState == GameState.GAME_WIN) {
+				if (gameState == GameState.GAME_OVER || gameState == GameState.GAME_WIN) {
 					return true;
 				}
 					
@@ -332,82 +378,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 								if (gameState != GameState.GAME_RUNNING) {
 									gameState = GameState.GAME_RUNNING;
 									timeStart = System.currentTimeMillis() + (long) timeTotal * 1000;
-								}
-								
-							} else if (isGameRunning() && block.getColor() == Color.WHITE) {
-								block.startWhiteAnim();
-								setGameOver();
-								showWinOrLose();
-								return true;
-							}
-							
-							if (isGameRunning()) {
-								moveDown();
-							}
-							break;
-						}
-					}
-					
-				}
-				return true;
-			}
-		});
-	}
-	
-	private void startClassicGame() {
-		lineCounts = 0;
-		endLineCounts = 0;
-		
-		timeRecord = 0;
-		timeStart = System.currentTimeMillis();
-		
-		speed = MainActivity.SCREEN_HEIGHT / 4;
-		speedAcc = 0f;
-		
-		initClassicTouchListener();
-		
-		addStartLine();
-		addNormalLine();
-		addNormalLine();
-		addNormalLine();
-	}
-	
-	private void initClassicTouchListener() {
-		setOnTouchListener(new OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View view, MotionEvent event) {
-				if (gameState == GameState.GAME_OVER) {
-					return true;
-				}
-				
-				if (gameState == GameState.GAME_WIN) {
-					return true;
-				}
-					
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-					float touchX = event.getX();
-					float touchY = event.getY();
-
-					// 控制只能触屏第二行的方块
-					int startIndex = 4;
-					if (blocks.get(0).getColor() == Color.YELLOW) {
-						startIndex = 1;
-					}
-					
-					for (int i = startIndex; i < startIndex + 4; ++i) {
-						Block block = blocks.get(i);
-						if (block.contains(touchX, touchY)) {
-							
-							if (block.getColor() == Color.BLACK) {
-								block.startBlackAnim();
-								blockRecord++;
-								
-								// 当点击的第一个黑块时游戏开始
-								if (gameState != GameState.GAME_RUNNING) {
-									gameState = GameState.GAME_RUNNING;
-									timeStart = System.currentTimeMillis();
 								}
 								
 							} else if (isGameRunning() && block.getColor() == Color.WHITE) {
@@ -496,6 +466,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 		return gameState == GameState.GAME_RUNNING;
 	}
 	
+	private boolean isGameStart() {
+		return gameState == GameState.GAME_START;
+	}
+	
 	class FasterThread extends Thread {
 		private SurfaceHolder holder;
 		private Paint paint = new Paint();
@@ -551,12 +525,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	class ClassicThread extends Thread {
+	class ClassicOrZenThread extends Thread {
 		private SurfaceHolder holder;
 		private Paint paint = new Paint();
 	    public boolean isRun ;
 	    
-	    public  ClassicThread(SurfaceHolder holder)
+	    public  ClassicOrZenThread(SurfaceHolder holder)
 	    {
 	        this.holder = holder; 
 	        isRun = true;
@@ -578,18 +552,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	                    }
 	                    
 	                    // 绘制成绩
-	                    paint.setColor(Color.RED);
-	                    paint.setTextSize(96f);
-	                    
-	                    if (gameState == GameState.GAME_RUNNING) {
-	                    	timeRecord = (System.currentTimeMillis() - timeStart) / 1000.0f;
-	                    } else if (gameState == GameState.GAME_START){
-	                    	timeRecord = 0;
-	                    }
-	                    
-	                    float x = MainActivity.SCREEN_WIDTH / 2;
-	                    float y = MainActivity.SCREEN_HEIGHT / 10;
-	                    canvas.drawText(String.format("%.3f\"", timeRecord), x, y, paint);
+	                    drawRecord(canvas);
 
 	                    Thread.sleep(THREAD_SLEEP_TIME);
 	                }
@@ -607,70 +570,35 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	            }
 	        }
 		}
-	}
-	
-	class ZenThread extends Thread {
-		private SurfaceHolder holder;
-		private Paint paint = new Paint();
-	    public boolean isRun ;
-	    
-	    public  ZenThread(SurfaceHolder holder)
-	    {
-	        this.holder = holder; 
-	        isRun = true;
-	    }
-	    
-		@Override
-		public void run() {
-	        while(isRun)
-	        {
-	            Canvas canvas = null;
-	            try
-	            {
-	                synchronized (holder)
-	                {
-	                	// 锁定画布，一般在锁定后就可以通过其返回的画布对象Canvas，在其上面画图等操作了。
-	                	canvas = holder.lockCanvas();
-	                    for (Block block : blocks) {
-	                    	block.draw(canvas, paint);
-	                    }
-	                    
-	                    // 绘制成绩
-	                    paint.setColor(Color.RED);
-	                    paint.setTextSize(96f);
-	                    
-	                    if (gameState == GameState.GAME_RUNNING) {
-	                    	timeRecord = (timeStart - System.currentTimeMillis()) / 1000.0f;
-	                    	
-	                    	if (timeRecord <= 0) {
-	                    		gameState = GameState.GAME_WIN;
-	                    		showWinOrLose();
-	                    		return;
-	                    	}
-	                    	
-	                    } else if (gameState == GameState.GAME_START){
-	                    	timeRecord = timeTotal;
-	                    }
-	                    
-	                    float x = MainActivity.SCREEN_WIDTH / 2;
-	                    float y = MainActivity.SCREEN_HEIGHT / 10;
-	                    canvas.drawText(String.format("%.3f\"", timeRecord), x, y, paint);
+		
+		private void drawRecord(Canvas canvas) {
+			paint.setColor(Color.RED);
+            paint.setTextSize(96f);
+            
+            if (isGameStart()) {
+            	if (gameMode == GameMode.GAME_CLASSIC) {
+            		timeRecord = 0;
+            	} else if (gameMode == GameMode.GAME_Zen) {
+            		timeRecord = timeTotal;
+            	}
+            } else if (isGameRunning()) {
+            	if (gameMode == GameMode.GAME_CLASSIC) {
+            		timeRecord = (System.currentTimeMillis() - timeStart) / 1000.0f;
+            	} else if (gameMode == GameMode.GAME_Zen) {
+            		timeRecord = (timeStart - System.currentTimeMillis()) / 1000.0f;
 
-	                    Thread.sleep(THREAD_SLEEP_TIME);
-	                }
-	            }
-	            catch (Exception e) {
-	                e.printStackTrace();
-	            }
-	            finally
-	            {
-	                if(canvas != null)
-	                {
-	                	// 结束锁定画图，并提交改变。
-	                    holder.unlockCanvasAndPost(canvas);
-	                }
-	            }
-	        }
+            		// 当时间结束时，禅境模式胜利结束
+            		if (timeRecord <= 0) {
+            			gameState = GameState.GAME_WIN;
+            			showWinOrLose();
+            			return;
+            		}
+            	}
+            }
+            
+            float x = MainActivity.SCREEN_WIDTH / 2;
+            float y = MainActivity.SCREEN_HEIGHT / 10;
+            canvas.drawText(String.format("%.3f\"", timeRecord), x, y, paint);
 		}
 	}
 	
@@ -714,9 +642,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     // 禅模式下的参数，该模式下会沿用blockRecord，timeStart和timeRecord参数
     private float timeTotal = 30f;			// 游戏总共时间
     
-    private ClassicThread drawThread;
-    private ZenThread zenThread;
-    private FasterThread moveThread;		// 移动线程，此线程中也包含了绘制代码，但不能同时执行绘制线程和街机线材，会导致绘制延迟，考虑如果让move线程每一秒都走，说不定可以
+    private ClassicOrZenThread classicOrzenThread;
+    private FasterThread fasterThread;		// 移动线程，此线程中也包含了绘制代码，但不能同时执行绘制线程和街机线材，会导致绘制延迟，考虑如果让move线程每一秒都走，说不定可以
     
     
     
