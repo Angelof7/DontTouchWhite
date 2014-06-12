@@ -27,7 +27,7 @@ public class WinOrLoseActivity extends Activity {
 		
 		handleGameMode();
 		
-		BadiduAd.getBadiduAd(this).showAd(this);
+		BadiduAd.getBadiduAd().showAd(this);
 	}
 	
 	/**

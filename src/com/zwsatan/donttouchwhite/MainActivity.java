@@ -57,6 +57,9 @@ public class MainActivity extends Activity {
 
     	// 由于音效需要加载一堆声音，因此这里先初始化一次音效
     	SoundEngine.getSoundEngine();
+    	
+    	// 初始化百度广告
+    	BadiduAd.getBadiduAd();
     }
     
     private void initUI() {
