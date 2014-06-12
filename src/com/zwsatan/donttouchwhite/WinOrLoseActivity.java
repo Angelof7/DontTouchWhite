@@ -6,6 +6,7 @@ import com.zwsatan.donttouchwhite.GameView.GameState;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -25,6 +26,18 @@ public class WinOrLoseActivity extends Activity {
 		initButton();
 		
 		handleGameMode();
+	}
+	
+	/**
+	 * 屏蔽掉返回键
+	 */
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		switch (keyCode) {
+		case KeyEvent.KEYCODE_BACK:
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 	
 	/**

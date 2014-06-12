@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
@@ -31,8 +32,22 @@ public class MainActivity extends Activity {
         initGameData();
 		
         initUI();
+        
+        handleRestartGame();
     }
     
+    /**
+	 * 屏蔽掉返回键
+	 */
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		switch (keyCode) {
+		case KeyEvent.KEYCODE_BACK:
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
     private void initGameData() {
     	// 获取屏幕大小
     	DisplayMetrics dm = new DisplayMetrics();
@@ -42,17 +57,6 @@ public class MainActivity extends Activity {
 
     	// 由于音效需要加载一堆声音，因此这里先初始化一次音效
     	SoundEngine.getSoundEngine();
-    			
-    	// 判断是否是重新开始的游戏
-    	Intent intent = getIntent();
-		boolean isRestartGame = intent.getBooleanExtra(DATA_IS_GAME_RESTART, false);
-		if (isRestartGame) {
-			// 按钮归位，由于是FrameLayout，进行游戏的时候，按钮设置坐标到屏幕之外了
-			backToGame();
-			
-			GameMode gameMode = (GameMode) intent.getSerializableExtra(DATA_GAME_MODE);
-			gameView.startGame(gameMode);
-		}
     }
     
     private void initUI() {
@@ -104,6 +108,19 @@ public class MainActivity extends Activity {
     			}
     		}
     	});
+    }
+    
+    private void handleRestartGame() {
+    	// 判断是否是重新开始的游戏
+    	Intent intent = getIntent();
+		boolean isRestartGame = intent.getBooleanExtra(DATA_IS_GAME_RESTART, false);
+		if (isRestartGame) {
+			// 按钮归位，由于是FrameLayout，进行游戏的时候，按钮设置坐标到屏幕之外了
+			backToGame();
+			
+			GameMode gameMode = (GameMode) intent.getSerializableExtra(DATA_GAME_MODE);
+			gameView.startGame(gameMode);
+		}
     }
     
     /**
