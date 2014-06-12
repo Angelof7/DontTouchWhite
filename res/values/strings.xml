@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">DontTouchWhite</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_name">别踩白块儿(精简版)</string>
     <string name="action_settings">Settings</string>
  	<string name="back">返回</string>
     <string name="share">分享</string>

@@ -19,51 +19,6 @@ import android.view.View;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
-	public enum GameMode {
-		GAME_NONE,
-		GAME_CLASSIC,
-		GAME_FASTER,
-		GAME_Zen
-	};
-	
-	public enum GameState {
-		GAME_UNSTART,
-		GAME_START,
-		GAME_RUNNING,
-		GAME_OVER,
-		GAME_WIN
-	};
-	
-	public static SurfaceHolder holder;
-	
-	private GameMode gameMode = GameMode.GAME_NONE;
-	private GameState gameState = GameState.GAME_UNSTART;
-
-	// 共有参数
-	private static final int THREAD_SLEEP_TIME = 20;	// 控制所有线材睡眠20ms，即50帧
-	private float speed;					// 控制各个游戏模式下的方块下落速度
-	private float speedAcc;					// 控制各个游戏模式下方块下落的加速度
-	
-	// 经典模式下的参数
-    private ClassicThread drawThread;		// 绘制线程
-    private static final int WIN_LINES = 50;// 胜利所需要的所有行数
-    private int lineCounts;					// 记录现在一共鼓了多少行
-    private int endLineCounts;				// 记录结束行出现了多少行
-    private long timeStart;					// 记录游戏起始时间
-    private float timeRecord;				// 记录游戏进行时间
-    
-    // 街机模式下的参数
-    private FasterThread moveThread;		// 移动线程，此线程中也包含了绘制代码，但不能同时执行绘制线程和街机线材，会导致绘制延迟
-    										// 考虑如果让move线程每一秒都走，说不定可以
-    private int blockRecord;				// 记录街机模式下当前击中黑块数目
-    
-    // 禅模式下的参数
-    private ZenThread zenThread;
-    private float timeTotal = 30f;			// 游戏总共时间
-    
-    // 方块组集合
-    private List<Block> blocks = new ArrayList<Block>();
-    
 	public GameView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initGameView();
@@ -718,5 +673,52 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	        }
 		}
 	}
+	
+	public enum GameMode {
+		GAME_NONE,
+		GAME_CLASSIC,
+		GAME_FASTER,
+		GAME_Zen
+	};
+	
+	public enum GameState {
+		GAME_UNSTART,
+		GAME_START,
+		GAME_RUNNING,
+		GAME_OVER,
+		GAME_WIN
+	};
+	
+	// 共有参数
+	public static SurfaceHolder holder;
+	private static final int THREAD_SLEEP_TIME = 20;	// 控制所有线材睡眠20ms，即50帧
+	
+	private GameMode gameMode = GameMode.GAME_NONE;
+	private GameState gameState = GameState.GAME_UNSTART;
+	
+	private float speed;					// 控制各个游戏模式下的方块下落速度
+	private float speedAcc;					// 控制各个游戏模式下方块下落的加速度
+	
+	private List<Block> blocks = new ArrayList<Block>(); // 方块组集合
+	
+	// 经典模式下的参数
+    private static final int WIN_LINES = 50;// 胜利所需要的所有行数
+    private int lineCounts;					// 记录现在一共鼓了多少行
+    private int endLineCounts;				// 记录结束行出现了多少行
+    private long timeStart;					// 记录游戏起始时间
+    private float timeRecord;				// 记录游戏进行时间
+    
+    // 街机模式下的参数
+    private int blockRecord;				// 记录街机模式下当前击中黑块数目
+    
+    // 禅模式下的参数，该模式下会沿用blockRecord，timeStart和timeRecord参数
+    private float timeTotal = 30f;			// 游戏总共时间
+    
+    private ClassicThread drawThread;
+    private ZenThread zenThread;
+    private FasterThread moveThread;		// 移动线程，此线程中也包含了绘制代码，但不能同时执行绘制线程和街机线材，会导致绘制延迟，考虑如果让move线程每一秒都走，说不定可以
+    
+    
+    
 }
 
