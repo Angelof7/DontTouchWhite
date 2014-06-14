@@ -71,6 +71,12 @@ public class MainActivity extends Activity {
 
     	gameView = (GameView) findViewById(R.id.gameview);
 
+    	if (SoundEngine.getSoundEngine().isOn()) {
+			buttonMusic.setText("琴声");
+		} else {
+			buttonMusic.setText("静音");
+		}
+    	
     	buttonClassic.setOnClickListener(new OnClickListener() {
 
     		@Override
