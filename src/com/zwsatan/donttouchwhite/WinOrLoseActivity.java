@@ -91,7 +91,6 @@ public class WinOrLoseActivity extends Activity {
 			}
 		});
 		
-		// 分享按钮暂时没做
 		buttonShare = (Button) findViewById(R.id.button_share);
 		buttonShare.setOnClickListener(new OnClickListener() {
 			
@@ -190,9 +189,9 @@ public class WinOrLoseActivity extends Activity {
 		buttonBack.setBackgroundColor(getResources().getColor(R.color.nicegreen));
 		
 		textNewRecordTitle.setVisibility(TextView.VISIBLE);
-		textNewRecordTitle.setText(newRecord);
 		textFailTitle.setVisibility(TextView.GONE);
-		textRecord.setVisibility(TextView.GONE);
+		textRecord.setVisibility(TextView.VISIBLE);
+		textRecord.setText(newRecord);
 		textBestRecord.setVisibility(TextView.GONE);
 	}
 	
